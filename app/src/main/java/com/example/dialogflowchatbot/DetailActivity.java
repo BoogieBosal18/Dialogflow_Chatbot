@@ -88,7 +88,7 @@ public class DetailActivity extends AppCompatActivity {
 
     int seq=0;
     int comment_seq;
-
+    int comment_temp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +124,7 @@ public class DetailActivity extends AppCompatActivity {
         reg_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //getFirebaseDatabase();
                 postFirebaseDatabase(true);
                 getFirebaseDatabase();
             }
@@ -192,13 +193,34 @@ public class DetailActivity extends AppCompatActivity {
 
     // comment 추가
     public void postFirebaseDatabase(boolean add){
+
+
+        ValueEventListener postListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                FirebasePost get = dataSnapshot.getValue(FirebasePost.class);
+                if(userid.equals(username_tv))
+                    comment_temp=get.comment;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("getFirebaseDatabase","loadPost:onCancelled", databaseError.toException());
+            }
+        };
+
+
+
+
+
+
         mPostReference = FirebaseDatabase.getInstance().getReference();
         Map<String, Object> childUpdates = new HashMap<>();
         Map<String, Object> postValues = null;
 
-        childUpdates.put("/id_list/" + userid + "/comment"  ,  ++comment_seq);
+        childUpdates.put("/id_list/" + userid + "/comment"  ,  comment_temp);
 
-        mPostReference.child("/id_list/"+userid+"/comment"+ comment_seq + "/" ).setValue(comment_et.getText().toString());
+        mPostReference.child("/id_list/"+userid+"/comment"+ comment_temp++ + "/" ).setValue(comment_et.getText().toString());
         mPostReference.updateChildren(childUpdates);
         comment_et.setText("");
     }
